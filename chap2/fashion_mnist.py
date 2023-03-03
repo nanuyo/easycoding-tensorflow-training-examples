@@ -3,7 +3,7 @@ import tensorflow as tf
 data = tf.keras.datasets.fashion_mnist
 (training_images, training_labels), (test_images, test_labels) = data.load_data()
 
-print(training_images[0], end=" ")
+print(training_images[0])
 print(training_labels[0])
 
 training_images  = training_images / 255.0
