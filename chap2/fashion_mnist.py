@@ -40,3 +40,5 @@ print(test_labels[3])
 
 print(classifications[10000-1])
 print(test_labels[10000-1])
+
+model.summary()
