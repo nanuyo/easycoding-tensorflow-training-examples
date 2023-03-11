@@ -20,6 +20,8 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(10, activation=tf.nn.softmax)
 ])
 
+model.summary()
+
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
@@ -33,4 +35,3 @@ classifications = model.predict(test_images)
 print(classifications[0])
 print(test_labels[0])
 
-model.summary()
