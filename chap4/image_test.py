@@ -7,7 +7,8 @@ from keras.preprocessing import image
 new_model = tf.keras.models.load_model('my_model')
 new_model.summary()
 
-sample_images = ['human-{}.jpg'.format(i) for i in range(1, 5)]
+sample_images = ['image-{}.jpg'.format(i) for i in range(1, 8)]
+
 
 for fn in sample_images:
     # 이미지 출력
