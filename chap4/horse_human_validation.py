@@ -20,7 +20,6 @@ zip_ref = zipfile.ZipFile(validation_file_name, 'r')
 zip_ref.extractall(validation_dir)
 zip_ref.close()
 
-# 전체 이미지를 1./255로 스케일을 조정합니다.
 train_datagen = ImageDataGenerator(rescale=1/255)
 
 train_generator = train_datagen.flow_from_directory(
