@@ -13,6 +13,7 @@ ys = np.array([1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21], dtype=float)
 model.fit(xs, ys, epochs=1000)
 
 print(model.predict([2]))
-
 print(dense.get_weights())
 print(model.layers[0].get_weights())
+
+

@@ -67,3 +67,6 @@ model.fit(train_generator,
 # Evaluate the model on the test set
 test_loss, test_acc = model.evaluate(validation_generator)
 print('Test accuracy:', test_acc)
+
+
+model.save('my_model')
