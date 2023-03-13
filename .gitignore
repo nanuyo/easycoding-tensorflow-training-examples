@@ -1,6 +1,6 @@
 my_model/
 horse-or-human/
-.zip
+*.zip
 .idea/
 
 # Byte-compiled / optimized / DLL files
