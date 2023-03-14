@@ -1,8 +1,8 @@
 import urllib.request
+import zipfile
 from tensorflow.keras import layers
 from tensorflow.keras import Model
 from tensorflow.keras.applications.inception_v3 import InceptionV3
-import zipfile
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.optimizers import RMSprop
 
@@ -20,15 +20,15 @@ for layer in pre_trained_model.layers:
     layer.trainable = False
 
 last_layer = pre_trained_model.get_layer('mixed7')
-print('마지막 층의 출력 크기: ', last_layer.output_shape)
+print('Last layer output shape: ', last_layer.output_shape)
 last_output = last_layer.output
 
-
-# 출력을 펼쳐서 1차원으로 만듭니다.
 x = layers.Flatten()(last_output)
-# 1,204개 은닉 유닛과 렐루 활성화 함수를 사용한 완전 연결 층을 추가합니다.
+
 x = layers.Dense(1024, activation='relu')(x)
-# 분류를 위해 시그모이드 함수를 사용하는 최종 층을 추가합니다.
+
+x = layers.Dropout(0.2)(x)
+
 x = layers.Dense(1, activation='sigmoid')(x)
 
 model = Model(pre_trained_model.input, x)
@@ -54,7 +54,13 @@ zip_ref = zipfile.ZipFile(validation_file_name, 'r')
 zip_ref.extractall(validation_dir)
 zip_ref.close()
 
-train_datagen = ImageDataGenerator(rescale=1/255)
+train_datagen = ImageDataGenerator(rescale=1./255.,
+                                   rotation_range=40,
+                                   width_shift_range=0.2,
+                                   height_shift_range=0.2,
+                                   shear_range=0.2,
+                                   zoom_range=0.2,
+                                   horizontal_flip=True)
 
 train_generator = train_datagen.flow_from_directory(
     training_dir,
