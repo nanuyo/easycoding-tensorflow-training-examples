@@ -22,6 +22,6 @@ for fn in sample_images:
 
     print('Score:', human_or_horse[0][0])
     if human_or_horse[0][0] > 0.5:
-        print(fn + " is Human.")
+        print(fn + " is a Human.")
     else:
-        print(fn + " is Horse.")
+        print(fn + " is a Horse.")
