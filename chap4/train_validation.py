@@ -69,4 +69,4 @@ test_loss, test_acc = model.evaluate(validation_generator)
 print('Test accuracy:', test_acc)
 
 
-model.save('my_model')
+model.save('horse_human_model')
