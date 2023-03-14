@@ -2,3 +2,4 @@ tensorflow
 pillow
 scipy
 matplotlib
+urllib3

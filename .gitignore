@@ -1,5 +1,9 @@
+inception_v3.h5
 my_model/
 horse-or-human/
+horse_human_model/
+horse_human_model2/
+horse_human_img_aug_model/
 *.zip
 .idea/
 
