@@ -85,3 +85,4 @@ model.compile(loss = 'categorical_crossentropy', optimizer='rmsprop', metrics=['
 history = model.fit(train_generator, epochs=25, validation_data = validation_generator, verbose = 1)
 
 model.save("rps.h5")
+#model.save('rps_model')

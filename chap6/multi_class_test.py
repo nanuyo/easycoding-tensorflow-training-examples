@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 model = tf.keras.models.load_model('rps.h5')
+#model = tf.keras.models.load_model('rps_model')
 model.summary()
 
 
