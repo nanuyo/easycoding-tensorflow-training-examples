@@ -20,7 +20,16 @@ zip_ref = zipfile.ZipFile(validation_file_name, 'r')
 zip_ref.extractall(validation_dir)
 zip_ref.close()
 
-train_datagen = ImageDataGenerator(rescale=1/255)
+train_datagen = ImageDataGenerator(
+    rescale=1./255,
+    rotation_range=40,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    shear_range=0.2,
+    zoom_range=0.2,
+    horizontal_flip=True,
+    fill_mode='nearest'
+)
 
 train_generator = train_datagen.flow_from_directory(
     training_dir,
@@ -64,9 +73,8 @@ model.fit(train_generator,
           epochs=15,
           validation_data=validation_generator)
 
-# Evaluate the model on the test set
 test_loss, test_acc = model.evaluate(validation_generator)
 print('Test accuracy:', test_acc)
 
 
-model.save('horse_human_model')
+model.save('horse_human_img_aug_model')
