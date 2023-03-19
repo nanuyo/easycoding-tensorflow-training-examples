@@ -64,7 +64,7 @@ print(len(os.listdir('cat-or-dog/testing/cats/')))
 print(len(os.listdir('cat-or-dog/testing/dogs/')))
 
 TRAINING_DIR = "cat-or-dog/training/"
-# Experiment with your own parameters here to really try to drive it to 99.9% accuracy or better
+
 train_datagen = ImageDataGenerator(rescale=1./255,
       rotation_range=40,
       width_shift_range=0.2,
@@ -79,7 +79,7 @@ train_generator = train_datagen.flow_from_directory(TRAINING_DIR,
                                                     target_size=(150, 150))
 
 VALIDATION_DIR = "cat-or-dog/testing/"
-# Experiment with your own parameters here to really try to drive it to 99.9% accuracy or better
+
 validation_datagen = ImageDataGenerator(rescale=1./255)
 validation_generator = validation_datagen.flow_from_directory(VALIDATION_DIR,
                                                               batch_size=100,
@@ -95,18 +95,20 @@ pre_trained_model = InceptionV3(input_shape=(150, 150, 3),
                                 include_top=False,
                                 weights=None)
 
+
+pre_trained_model.summary()
+
 pre_trained_model.load_weights(weights_file)
+
+print(pre_trained_model.layers)
 
 for layer in pre_trained_model.layers:
     layer.trainable = False
 
-pre_trained_model.summary()
 
 last_layer = pre_trained_model.get_layer('mixed7')
 print('last layer output shape: ', last_layer.output_shape)
 last_output = last_layer.output
-
-
 
 # Flatten the output layer to 1 dimension
 x = layers.Flatten()(last_output)
@@ -119,6 +121,7 @@ x = layers.Dense(1, activation='sigmoid')(x)
 
 model = Model(pre_trained_model.input, x)
 
+model.summary()
 
 model.compile(optimizer=RMSprop(learning_rate=0.0001),
               loss='binary_crossentropy',
