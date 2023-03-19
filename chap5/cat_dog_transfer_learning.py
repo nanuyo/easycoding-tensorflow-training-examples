@@ -100,7 +100,7 @@ pre_trained_model.load_weights(weights_file)
 for layer in pre_trained_model.layers:
     layer.trainable = False
 
-# pre_trained_model.summary()
+pre_trained_model.summary()
 
 last_layer = pre_trained_model.get_layer('mixed7')
 print('last layer output shape: ', last_layer.output_shape)
