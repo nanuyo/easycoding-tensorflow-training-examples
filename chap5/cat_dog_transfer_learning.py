@@ -9,12 +9,20 @@ from tensorflow.keras.applications.inception_v3 import InceptionV3
 from tensorflow.keras.optimizers import RMSprop
 from shutil import copyfile
 
-url = "https://download.microsoft.com/download/3/E/1/3E1C3F21-ECDB-4869-8368-6DEBA77B919F/kagglecatsanddogs_5340.zip"
-file_name = "kagglecatsanddogs_5340.zip"
-urllib.request.urlretrieve(url, file_name)
-zip_ref = zipfile.ZipFile(file_name, 'r')
-zip_ref.extractall()
-zip_ref.close()
+
+
+
+
+if os.path.isdir("PetImages"):
+    print("PetImages exists")
+else:
+    print("PetImages does not exist")
+    url = "https://download.microsoft.com/download/3/E/1/3E1C3F21-ECDB-4869-8368-6DEBA77B919F/kagglecatsanddogs_5340.zip"
+    file_name = "kagglecatsanddogs_5340.zip"
+    urllib.request.urlretrieve(url, file_name)
+    zip_ref = zipfile.ZipFile(file_name, 'r')
+    zip_ref.extractall()
+    zip_ref.close()
 
 print(len(os.listdir('PetImages/Cat/')))
 print(len(os.listdir('PetImages/Dog/')))
@@ -118,7 +126,7 @@ last_layer = pre_trained_model.get_layer('mixed7')
 
 x = layers.Flatten()(last_layer.output)
 x = layers.Dense(1024, activation='relu')(x)
-x = layers.Dropout(0.2)(x)
+#x = layers.Dropout(0.2)(x)
 x = layers.Dense(1, activation='sigmoid')(x)
 
 model = Model(pre_trained_model.input, x)
