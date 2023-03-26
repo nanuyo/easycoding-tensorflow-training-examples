@@ -1,6 +1,7 @@
 rps/
 rps.h5
 cat_dog_transfer_learning_model/
+cat_dog_transfer_learning_model_dropout/
 cat-or-dog/
 PetImages/
 horse_human_transfer_learning_model/
