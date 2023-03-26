@@ -5,6 +5,7 @@ cat_dog_transfer_learning_model_dropout/
 cat-or-dog/
 PetImages/
 horse_human_transfer_learning_model/
+horse_human_transfer_learning_model_dropout/
 inception_v3.h5
 rps_model/
 horse-or-human/
