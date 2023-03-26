@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from keras.preprocessing import image
 
-new_model = tf.keras.models.load_model('cat_dog_transfer_learning_model')
+new_model = tf.keras.models.load_model('cat_dog_transfer_learning_model_dropout')
 new_model.summary()
 
 sample_images = ['dog-{}.jpg'.format(i) for i in range(1, 3)]

@@ -9,7 +9,7 @@ from tensorflow.keras.optimizers import RMSprop
 weights_url = "https://storage.googleapis.com/mledu-datasets/inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5"
 weights_file = "inception_v3.h5"
 urllib.request.urlretrieve(weights_url, weights_file)
-pre_trained_model = InceptionV3(input_shape=(150, 150, 3),
+pre_trained_model = InceptionV3(input_shape=(300, 300, 3),
                                 include_top=False,
                                 weights=None)
 pre_trained_model.load_weights(weights_file)
@@ -27,7 +27,7 @@ x = layers.Flatten()(last_output)
 
 x = layers.Dense(1024, activation='relu')(x)
 
-x = layers.Dropout(0.2)(x)
+#x = layers.Dropout(0.2)(x)
 
 x = layers.Dense(1, activation='sigmoid')(x)
 
@@ -54,26 +54,28 @@ zip_ref = zipfile.ZipFile(validation_file_name, 'r')
 zip_ref.extractall(validation_dir)
 zip_ref.close()
 
+
 train_datagen = ImageDataGenerator(rescale=1./255.,
                                    rotation_range=40,
                                    width_shift_range=0.2,
                                    height_shift_range=0.2,
                                    shear_range=0.2,
                                    zoom_range=0.2,
-                                   horizontal_flip=True)
+                                   horizontal_flip=True,
+                                   fill_mode = 'nearest')
 
 train_generator = train_datagen.flow_from_directory(
     training_dir,
-    batch_size=20,
+    batch_size=100,
     class_mode='binary',
-    target_size=(150, 150)
+    target_size=(300, 300)
 )
 
 validation_datagen = ImageDataGenerator(rescale=1/255)
 
 validation_generator = validation_datagen.flow_from_directory(
     validation_dir,
-    target_size=(150, 150),
+    target_size=(300, 300),
     class_mode='binary'
 )
 

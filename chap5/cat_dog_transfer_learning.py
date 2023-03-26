@@ -144,4 +144,4 @@ history = model.fit(
             epochs=20,
             verbose=1)
 
-model.save('cat_dog_transfer_learning_model')
+model.save('cat_dog_transfer_learning_model_dropout')
