@@ -1,12 +1,13 @@
-import json
 import tensorflow as tf
-
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-
 from bs4 import BeautifulSoup
 import string
+import urllib.request
+import json
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+import matplotlib.pyplot as plt
 
+#불용어 테이블
 stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "as", "at",
              "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "could", "did", "do",
              "does", "doing", "down", "during", "each", "few", "for", "from", "further", "had", "has", "have", "having",
@@ -21,38 +22,48 @@ stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "a
              "whys", "with", "would", "you", "youd", "youll", "youre", "youve", "your", "yours", "yourself",
              "yourselves"]
 
-table = str.maketrans('', '', string.punctuation)
-
-import urllib.request
+#빈정거림 기사 데이터 다운로드
 url = "https://storage.googleapis.com/learning-datasets/sarcasm.json"
 file_name = "sarcasm.json"
 urllib.request.urlretrieve(url, file_name)
 
-import json
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-
+#json 화일 로딩
 with open("sarcasm.json", 'r') as f:
     datastore = json.load(f)
-
 sentences = []
 labels = []
 urls = []
+
 for item in datastore:
+    #headline 만 추출
     sentence = item['headline'].lower()
+    #him/her => him / her 로 분리
     sentence = sentence.replace(",", " , ")
     sentence = sentence.replace(".", " . ")
     sentence = sentence.replace("-", " - ")
     sentence = sentence.replace("/", " / ")
-    soup = BeautifulSoup(sentence)
+    #html tag 제거
+    soup = BeautifulSoup(sentence, features="html.parser")
     sentence = soup.get_text()
+    # print(sentence)
+    #former versace store clerk sues over secret 'black code' for minority shoppers
+
+
+    #문장을 단어테이블로 만듦
     words = sentence.split()
+    #print(words)
+    #['former', 'versace', 'store', 'clerk', 'sues', 'over', 'secret', "'black", "code'", 'for', 'minority', 'shoppers']
+
+    # 구두점 테이블 만듬
+    table = str.maketrans('', '', string.punctuation)
     filtered_sentence = ""
     for word in words:
+        #구두점 제거
         word = word.translate(table)
+        # 불용어 제거
         if word not in stopwords:
             filtered_sentence = filtered_sentence + word + " "
-    sentences.append(filtered_sentence)
+    sentences.append(filtered_sentence)    #'former versace store clerk sues secret black code minority shoppers '
     labels.append(item['is_sarcastic'])
     urls.append(item['article_link'])
 
@@ -65,34 +76,34 @@ for item in sentences:
     ys.append(len(item))
 newys = sorted(ys)
 
-import matplotlib.pyplot as plt
-
 plt.plot(xs, newys)
 plt.axis([26000, 27000, 50, 250])
 plt.show()
 
 print(newys[26000])
 
-vocab_size = 10000
-embedding_dim = 16
-max_length = 100
-trunc_type = 'post'
-padding_type = 'post'
-oov_tok = ""
-training_size = 23000
 
+#훈련세트와 테스트 세트 나누기
+training_size = 23000
 training_sentences = sentences[0:training_size]
 testing_sentences = sentences[training_size:]
 training_labels = labels[0:training_size]
 testing_labels = labels[training_size:]
 
+vocab_size = 10000 #단어 만개로 구성된 어휘사전
+max_length = 100  #최대 문장길이를 100개 단어로
+trunc_type = 'post'  #이보다 문장이 길다면 끝부분을 자르고
+padding_type = 'post'  #이보다 문장이 짧다면 끝에 패딩을 추가
+oov_tok = "<OOV>"  #oov 토큰 사용
+
 tokenizer = Tokenizer(num_words=vocab_size, oov_token=oov_tok)
 tokenizer.fit_on_texts(training_sentences)
-
 word_index = tokenizer.word_index
-
+print(word_index)
 training_sequences = tokenizer.texts_to_sequences(training_sentences)
+print(training_sequences[0])
 training_padded = pad_sequences(training_sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
+print(training_padded[0])
 
 testing_sequences = tokenizer.texts_to_sequences(testing_sentences)
 testing_padded = pad_sequences(testing_sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
@@ -134,9 +145,10 @@ training_padded = np.array(training_padded)
 training_labels = np.array(training_labels)
 testing_padded = np.array(testing_padded)
 testing_labels = np.array(testing_labels)
+embedding_dim = 16 #각 단어에 대해 16차원의 배열을 초기화(어휘사전에 있는 각 단어는 16차원벡터에 할당됨)
 
 model = tf.keras.Sequential([
-    tf.keras.layers.Embedding(vocab_size, embedding_dim),
+    tf.keras.layers.Embedding(vocab_size, embedding_dim), #임베딩층 정의
     tf.keras.layers.GlobalAveragePooling1D(),
     tf.keras.layers.Dense(24, activation='relu'),
     tf.keras.layers.Dense(1, activation='sigmoid')

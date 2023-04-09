@@ -8,8 +8,8 @@ data = [
     'This is a cat',
     'I really like playing with my dog and cat'
 ]
-
-tokenizer = Tokenizer(num_words=100, oov_token="<OOV>")
+tokenizer = Tokenizer(num_words=100)
+#tokenizer = Tokenizer(num_words=100, oov_token="<OOV>")
 tokenizer.fit_on_texts(data)
 word_index = tokenizer.word_index
 
