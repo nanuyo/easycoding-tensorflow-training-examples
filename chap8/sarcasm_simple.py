@@ -5,7 +5,7 @@ import urllib.request
 import json
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-import matplotlib.pyplot as plt
+import numpy as np
 
 #불용어 테이블
 stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "as", "at",
@@ -30,7 +30,8 @@ urllib.request.urlretrieve(url, file_name)
 #json 화일 로딩
 with open("sarcasm.json", 'r') as f:
     datastore = json.load(f)
-print(datastore)
+
+#print(datastore)
 
 sentences = []
 labels = []
@@ -49,7 +50,6 @@ for item in datastore:
     sentence = soup.get_text()
     # print(sentence)
     #former versace store clerk sues over secret 'black code' for minority shoppers
-
 
     #문장을 단어테이블로 만듦
     words = sentence.split()
@@ -71,21 +71,6 @@ for item in datastore:
     labels.append(item['is_sarcastic'])
     urls.append(item['article_link'])
 
-xs = []
-ys = []
-current_item = 1
-for item in sentences:
-    xs.append(current_item)
-    current_item = current_item + 1
-    ys.append(len(item))
-newys = sorted(ys)
-
-plt.plot(xs, newys)
-plt.axis([26000, 27000, 50, 250])
-plt.show()
-
-print(newys[26000])
-
 
 #훈련세트와 테스트 세트 나누기
 training_size = 23000
@@ -103,47 +88,18 @@ oov_tok = "<OOV>"  #oov 토큰 사용
 tokenizer = Tokenizer(num_words=vocab_size, oov_token=oov_tok)
 tokenizer.fit_on_texts(training_sentences)
 word_index = tokenizer.word_index
-print(word_index)
+#print(word_index)
 training_sequences = tokenizer.texts_to_sequences(training_sentences)
-print(training_sequences[0])
+# print(training_sequences[0])
 training_padded = pad_sequences(training_sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
-print(training_padded[0])
+# print(training_padded[0])
 
 testing_sequences = tokenizer.texts_to_sequences(testing_sentences)
 testing_padded = pad_sequences(testing_sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
 
 wc = tokenizer.word_counts
-print(wc)
+# print(wc)
 
-import matplotlib.pyplot as plt
-
-wc = tokenizer.word_counts
-from collections import OrderedDict
-
-newlist = (OrderedDict(sorted(wc.items(), key=lambda t: t[1], reverse=True)))
-print(word_index)
-print(newlist)
-xs = []
-ys = []
-curr_x = 1
-for item in newlist:
-    xs.append(curr_x)
-    curr_x = curr_x + 1
-    ys.append(newlist[item])
-
-print(ys)
-plt.plot(xs, ys)
-plt.axis([300, 10000, 0, 100])
-plt.show()
-print(ys[1000])
-print(ys[2000])
-
-print(ys[3125])
-print(ys[10000])
-print(ys[12156])
-
-# Need this block to get it to work with TensorFlow 2.x
-import numpy as np
 
 training_padded = np.array(training_padded)
 training_labels = np.array(training_labels)
@@ -162,83 +118,15 @@ model.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
 
 model.summary()
 
+# 훈련
 num_epochs = 100
-history = model.fit(training_padded, training_labels, epochs=num_epochs,
-                    validation_data=(testing_padded, testing_labels), verbose=2)
+history = model.fit(training_padded, training_labels, epochs=num_epochs, validation_data=(testing_padded, testing_labels), verbose=2)
 
-import matplotlib.pyplot as plt
+# 모델 저장
+model.save('sarcasm_model')
 
-
-def plot_graphs(history, string):
-    plt.plot(history.history[string])
-    plt.plot(history.history['val_' + string])
-    plt.xlabel("Epochs")
-    plt.ylabel(string)
-    plt.legend([string, 'val_' + string])
-    plt.show()
-
-
-plot_graphs(history, "accuracy")
-plot_graphs(history, "loss")
-
-import matplotlib.pyplot as plt
-
-
-def plot_graphs(history, string):
-    plt.plot(history.history[string])
-    plt.plot(history.history['val_' + string])
-    plt.xlabel("Epochs")
-    plt.ylabel(string)
-    plt.legend([string, 'val_' + string])
-    plt.show()
-
-
-plot_graphs(history, "accuracy")
-plot_graphs(history, "loss")
-
-reverse_word_index = dict([(value, key) for (key, value) in word_index.items()])
-
-
-def decode_sentence(text):
-    return ' '.join([reverse_word_index.get(i, '?') for i in text])
-
-
-print(decode_sentence(training_padded[0]))
-print(training_sentences[2])
-print(labels[2])
-
-e = model.layers[0]
-weights = e.get_weights()[0]
-print(weights.shape)  # shape: (vocab_size, embedding_dim)
-
-print(reverse_word_index[2])
-print(weights[2])
-
-import io
-
-out_v = io.open('vecs.tsv', 'w', encoding='utf-8')
-out_m = io.open('meta.tsv', 'w', encoding='utf-8')
-for word_num in range(1, vocab_size):
-    word = reverse_word_index[word_num]
-    embeddings = weights[word_num]
-    out_m.write(word + "\n")
-    out_v.write('\t'.join([str(x) for x in embeddings]) + "\n")
-out_v.close()
-out_m.close()
-
-try:
-    from google.colab import files
-except ImportError:
-    pass
-else:
-    files.download('vecs.tsv')
-    files.download('meta.tsv')
-
-sentences = ["granny starting to fear spiders in the garden might be real",
-             "game of thrones season finale showing this sunday night", "TensorFlow book will be a best seller"]
-sequences = tokenizer.texts_to_sequences(sentences)
-print(sequences)
-padded = pad_sequences(sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
-print(padded)
-print(model.predict(padded))
-
+# 토크나이저 저장
+import pickle
+# saving
+with open('tokenizer.pickle', 'wb') as handle:
+    pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
