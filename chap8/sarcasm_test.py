@@ -17,8 +17,10 @@ with open('tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
 
 
-sentences = ["granny starting to fear spiders in the garden might be real",
-             "game of thrones season finale showing this sunday night", "TensorFlow book will be a best seller"]
+sentences = ["explaining advanced astrophysics to a toddler is just a piece of cake!",
+            "getting stuck in traffic for hours is everyone's idea of a fun time!",
+             "IU is my favorite singer",
+             "I like K-pop and K-Drama very much"]
 sequences = tokenizer.texts_to_sequences(sentences)
 print(sequences)
 padded = pad_sequences(sequences, maxlen=100, padding='post', truncating='post')
