@@ -105,7 +105,7 @@ training_padded = np.array(training_padded)
 training_labels = np.array(training_labels)
 testing_padded = np.array(testing_padded)
 testing_labels = np.array(testing_labels)
-embedding_dim = 16 #각 단어에 대해 16차원의 배열을 초기화(어휘사전에 있는 각 단어는 16차원벡터에 할당됨)
+embedding_dim = 100 #각 단어에 대해 16차원의 배열을 초기화(어휘사전에 있는 각 단어는 16차원벡터에 할당됨)
 
 model = tf.keras.Sequential([
     tf.keras.layers.Embedding(vocab_size, embedding_dim), #임베딩층 정의

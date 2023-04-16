@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
-new_model = tf.keras.models.load_model('sarcasm_model')
+new_model = tf.keras.models.load_model('sarcasm_model.h5')
 new_model.summary()
 
 import pickle
@@ -19,10 +19,11 @@ with open('tokenizer.pickle', 'rb') as handle:
 
 sentences = ["explaining advanced astrophysics to a toddler is just a piece of cake!",
             "getting stuck in traffic for hours is everyone's idea of a fun time!",
+             "I genuinely appreciate your efforts and the progress you've made. Keep up the good work!",
              "IU is my favorite singer",
              "I like K-pop and K-Drama very much"]
 sequences = tokenizer.texts_to_sequences(sentences)
 print(sequences)
-padded = pad_sequences(sequences, maxlen=100, padding='post', truncating='post')
+padded = pad_sequences(sequences, maxlen=120, padding='post', truncating='post')
 print(padded)
 print(new_model.predict(padded))
