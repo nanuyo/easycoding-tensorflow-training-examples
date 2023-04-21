@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
-new_model = tf.keras.models.load_model('sarcasm_model.h5')
+new_model = tf.keras.models.load_model('binjung_model')
 new_model.summary()
 
 import pickle
