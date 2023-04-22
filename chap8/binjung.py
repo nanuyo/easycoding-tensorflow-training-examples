@@ -4,26 +4,8 @@ import string
 import urllib.request
 import json
 from tensorflow.keras.preprocessing.text import Tokenizer
-
-#불용어 테이블
-stopwords = [
-    'a', 'about', 'above', 'after', 'again', 'against', 'ain\'t', 'all', 'am', 'an', 'and', 'any', 'are', 'aren\'t',
-    'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by', 'can', 'can\'t',
-    'cannot', 'could', 'couldn\'t', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'doing', 'don\'t', 'down', 'during',
-    'each', 'few', 'for', 'from', 'further', 'had', 'hadn\'t', 'has', 'hasn\'t', 'have', 'haven\'t', 'having', 'he',
-    'he\'d', 'he\'ll', 'he\'s', 'her', 'here', 'here\'s', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'how\'s',
-    'i', 'i\'d', 'i\'ll', 'i\'m', 'i\'ve', 'if', 'in', 'into', 'is', 'isn\'t', 'it', 'it\'s', 'its', 'itself', 'just',
-    'll', 'm', 'ma', 'me', 'might', 'mightn\'t', 'more', 'most', 'must', 'mustn\'t', 'my', 'myself', 'need', 'needn\'t',
-    'no', 'nor', 'not', 'now', 'o', 'of', 'off', 'on', 'once', 'only', 'or', 'other', 'ought', 'oughtn\'t', 'our', 'ours',
-    'ourselves', 'out', 'over', 'own', 're', 's', 'same', 'shan\'t', 'she', 'she\'d', 'she\'ll', 'she\'s', 'should',
-    'shouldn\'t', 'so', 'some', 'such', 't', 'than', 'that', 'that\'s', 'the', 'their', 'theirs', 'them', 'themselves',
-    'then', 'there', 'there\'s', 'these', 'they', 'they\'d', 'they\'ll', 'they\'re', 'they\'ve', 'this', 'those',
-    'through', 'to', 'too', 'under', 'until', 'up', 've', 'very', 'was', 'wasn\'t', 'we', 'we\'d', 'we\'ll', 'we\'re',
-    'we\'ve', 'were', 'weren\'t', 'what', 'what\'s', 'when', 'when\'s', 'where', 'where\'s', 'which', 'while', 'who',
-    'who\'s', 'whom', 'why', 'why\'s', 'will', 'with', 'won\'t', 'would', 'wouldn\'t', 'y', 'you', 'you\'d', 'you\'ll',
-    'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves'
-]
-
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+import numpy as np
 
 #빈정거림 기사 데이터 다운로드
 url = "https://storage.googleapis.com/learning-datasets/sarcasm.json"
@@ -33,14 +15,33 @@ urllib.request.urlretrieve(url, file_name)
 #json 화일 로딩
 with open("sarcasm.json", 'r') as f:
     datastore = json.load(f)
-
-print(json.dumps(datastore[:100], indent=4))
+print(json.dumps(datastore[:10], indent=4))
 print(len(datastore))
+
+
+#불용어 테이블
+stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "as", "at",
+             "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "could", "did", "do",
+             "does", "doing", "down", "during", "each", "few", "for", "from", "further", "had", "has", "have", "having",
+             "he", "hed", "hes", "her", "here", "heres", "hers", "herself", "him", "himself", "his", "how",
+             "hows", "i", "id", "ill", "im", "ive", "if", "in", "into", "is", "it", "its", "itself",
+             "lets", "me", "more", "most", "my", "myself", "nor", "of", "on", "once", "only", "or", "other", "ought",
+             "our", "ours", "ourselves", "out", "over", "own", "same", "she", "shed", "shell", "shes", "should",
+             "so", "some", "such", "than", "that", "thats", "the", "their", "theirs", "them", "themselves", "then",
+             "there", "theres", "these", "they", "theyd", "theyll", "theyre", "theyve", "this", "those", "through",
+             "to", "too", "under", "until", "up", "very", "was", "we", "wed", "well", "were", "weve", "were",
+             "what", "whats", "when", "whens", "where", "wheres", "which", "while", "who", "whos", "whom", "why",
+             "whys", "with", "would", "you", "youd", "youll", "youre", "youve", "your", "yours", "yourself",
+             "yourselves"]
+
+# 구두점 테이블 만듬
+table = str.maketrans('', '', string.punctuation)
+print(table)
+# exit()
 
 sentences = []
 labels = []
 urls = []
-
 for item in datastore:
     #headline 만 추출
     sentence = item['headline'].lower()
@@ -60,10 +61,6 @@ for item in datastore:
     #print(words)
     #['former', 'versace', 'store', 'clerk', 'sues', 'over', 'secret', "'black", "code'", 'for', 'minority', 'shoppers']
 
-    # 구두점 테이블 만듬
-    table = str.maketrans('', '', string.punctuation)
-    #print(table)
-
     filtered_sentence = ""
     for word in words:
         #구두점 제거
@@ -76,6 +73,18 @@ for item in datastore:
     urls.append(item['article_link'])
 
 
+
+tokenizer = Tokenizer(oov_token="<OOV>")
+tokenizer.fit_on_texts(sentences)
+word_index = tokenizer.word_index
+print(len(word_index))
+
+# 토크나이저 저장
+import pickle
+# saving
+with open('tokenizer.pickle', 'wb') as handle:
+    pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 #훈련세트와 테스트 세트 나누기
 training_size = 23000
 training_sentences = sentences[0:training_size]
@@ -83,37 +92,21 @@ testing_sentences = sentences[training_size:]
 training_labels = labels[0:training_size]
 testing_labels = labels[training_size:]
 
+print(len(sentences))
+print(sentences[0])
+print(len(training_sentences))
+
+
 
 max_length = 100  #최대 문장길이를 100개 단어로
 trunc_type = 'post'  #이보다 문장이 길다면 끝부분을 자르고
 padding_type = 'post'  #이보다 문장이 짧다면 끝에 패딩을 추가
-oov_tok = "<OOV>"  #oov 토큰 사용
-
-
-print(len(sentences))
-print(sentences[0])
-print(len(training_sentences))
-tokenizer = Tokenizer(oov_token=oov_tok)
-#tokenizer.fit_on_texts(training_sentences)
-tokenizer.fit_on_texts(sentences)
-word_index = tokenizer.word_index
-print(len(word_index))
-exit()
-# 토크나이저 저장
-import pickle
-# saving
-with open('tokenizer.pickle', 'wb') as handle:
-    pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
 
 training_sequences = tokenizer.texts_to_sequences(training_sentences)
-# print(training_sequences[0])
 training_padded = pad_sequences(training_sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
-# print(training_padded[0])
 
 testing_sequences = tokenizer.texts_to_sequences(testing_sentences)
 testing_padded = pad_sequences(testing_sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
-
 
 training_padded = np.array(training_padded)
 training_labels = np.array(training_labels)
@@ -129,6 +122,7 @@ model = tf.keras.Sequential([
     tf.keras.layers.Dropout(.25),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
+
 adam = tf.keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
 model.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
 
@@ -140,9 +134,6 @@ history = model.fit(training_padded, training_labels, epochs=num_epochs, validat
 
 # 모델 저장
 model.save('binjung_model')
-
-
-
 
 import matplotlib.pyplot as plt
 def plot_graphs(history, string):
