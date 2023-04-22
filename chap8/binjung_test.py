@@ -12,9 +12,9 @@ with open('tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
 
 
-sentences = ["explaining advanced astrophysics to a toddler is just a piece of cake!",
-            "getting stuck in traffic for hours is everyone's idea of a fun time!",
-             "I genuinely appreciate your efforts and the progress you've made. Keep up the good work!",
+sentences = ["explaining advanced astrophysics to a toddler is just a piece of cake",
+            "getting stuck in traffic for hours is everyone's idea of a fun time",
+             "I genuinely appreciate your efforts and the progress you have made. Keep up the good work",
              "IU is my favorite singer",
              "I like K-pop and K-Drama very much"]
 sequences = tokenizer.texts_to_sequences(sentences)

@@ -37,7 +37,7 @@ stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "a
 # 구두점 테이블 만듬
 table = str.maketrans('', '', string.punctuation)
 print(table)
-# exit()
+
 
 sentences = []
 labels = []
