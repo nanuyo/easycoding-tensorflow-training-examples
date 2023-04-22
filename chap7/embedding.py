@@ -1,4 +1,5 @@
 import tensorflow as tf
+import keyboard
 
 # Define the input data
 input_data = ["I love natural language processing",
@@ -10,13 +11,30 @@ input_data = ["I love natural language processing",
 tokenizer = tf.keras.preprocessing.text.Tokenizer()
 tokenizer.fit_on_texts(input_data)
 print(tokenizer.word_index)
-#print(tokenizer.word_index.keys())
+keyboard.wait('Enter')
+
+print(tokenizer.word_index.keys())
+keyboard.wait('Enter')
+
+
 sequences = tokenizer.texts_to_sequences(input_data)
 print(sequences)
+keyboard.wait('Enter')
+
 print(tokenizer.sequences_to_texts(sequences))
+keyboard.wait('Enter')
+
+
 # Pad the sequences to have the same length
 padded_sequences = tf.keras.preprocessing.sequence.pad_sequences(sequences)
 print(padded_sequences)
+keyboard.wait('Enter')
+print(len(tokenizer.word_index))
+keyboard.wait('Enter')
+print(padded_sequences.shape[1])
+keyboard.wait('Enter')
+
+
 
 # Define the embedding layer
 embedding_dim = 3
