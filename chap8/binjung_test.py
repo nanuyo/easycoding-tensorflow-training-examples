@@ -1,9 +1,4 @@
 import tensorflow as tf
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from keras.preprocessing import image
-from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
@@ -24,6 +19,9 @@ sentences = ["explaining advanced astrophysics to a toddler is just a piece of c
              "I like K-pop and K-Drama very much"]
 sequences = tokenizer.texts_to_sequences(sentences)
 print(sequences)
-padded = pad_sequences(sequences, maxlen=120, padding='post', truncating='post')
+padded = pad_sequences(sequences, maxlen=100, padding='post', truncating='post')
 print(padded)
 print(new_model.predict(padded))
+
+
+

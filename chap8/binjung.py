@@ -4,8 +4,6 @@ import string
 import urllib.request
 import json
 from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-import numpy as np
 
 #불용어 테이블
 stopwords = [
@@ -36,7 +34,8 @@ urllib.request.urlretrieve(url, file_name)
 with open("sarcasm.json", 'r') as f:
     datastore = json.load(f)
 
-#print(datastore)
+print(json.dumps(datastore[:100], indent=4))
+print(len(datastore))
 
 sentences = []
 labels = []
@@ -84,16 +83,29 @@ testing_sentences = sentences[training_size:]
 training_labels = labels[0:training_size]
 testing_labels = labels[training_size:]
 
-vocab_size = 10000 #단어 만개로 구성된 어휘사전
+
 max_length = 100  #최대 문장길이를 100개 단어로
 trunc_type = 'post'  #이보다 문장이 길다면 끝부분을 자르고
 padding_type = 'post'  #이보다 문장이 짧다면 끝에 패딩을 추가
 oov_tok = "<OOV>"  #oov 토큰 사용
 
-tokenizer = Tokenizer(num_words=vocab_size, oov_token=oov_tok)
-tokenizer.fit_on_texts(training_sentences)
+
+print(len(sentences))
+print(sentences[0])
+print(len(training_sentences))
+tokenizer = Tokenizer(oov_token=oov_tok)
+#tokenizer.fit_on_texts(training_sentences)
+tokenizer.fit_on_texts(sentences)
 word_index = tokenizer.word_index
-#print(word_index)
+print(len(word_index))
+exit()
+# 토크나이저 저장
+import pickle
+# saving
+with open('tokenizer.pickle', 'wb') as handle:
+    pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
 training_sequences = tokenizer.texts_to_sequences(training_sentences)
 # print(training_sequences[0])
 training_padded = pad_sequences(training_sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
@@ -101,9 +113,6 @@ training_padded = pad_sequences(training_sequences, maxlen=max_length, padding=p
 
 testing_sequences = tokenizer.texts_to_sequences(testing_sentences)
 testing_padded = pad_sequences(testing_sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
-
-wc = tokenizer.word_counts
-# print(wc)
 
 
 training_padded = np.array(training_padded)
@@ -113,9 +122,10 @@ testing_labels = np.array(testing_labels)
 embedding_dim = 16 #각 단어에 대해 16차원의 배열을 초기화(어휘사전에 있는 각 단어는 16차원벡터에 할당됨)
 
 model = tf.keras.Sequential([
-    tf.keras.layers.Embedding(vocab_size, embedding_dim), #임베딩층 정의
+    tf.keras.layers.Embedding(len(word_index)+1, embedding_dim), #임베딩층 정의
     tf.keras.layers.GlobalAveragePooling1D(),
-    tf.keras.layers.Dense(24, activation='relu'),
+    tf.keras.layers.Dense(24, activation='relu',
+                          kernel_regularizer=tf.keras.regularizers.l2(0.01)),
     tf.keras.layers.Dropout(.25),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
@@ -131,11 +141,7 @@ history = model.fit(training_padded, training_labels, epochs=num_epochs, validat
 # 모델 저장
 model.save('binjung_model')
 
-# 토크나이저 저장
-import pickle
-# saving
-with open('tokenizer.pickle', 'wb') as handle:
-    pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 
 import matplotlib.pyplot as plt

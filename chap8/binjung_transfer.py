@@ -1,10 +1,4 @@
-import json
 import tensorflow as tf
-import numpy as np
-
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-
 from bs4 import BeautifulSoup
 import string
 
@@ -36,9 +30,6 @@ file_name = "sarcasm.json"
 urllib.request.urlretrieve(url, file_name)
 
 import json
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-
 with open("sarcasm.json", 'r') as f:
     datastore = json.load(f)
 
