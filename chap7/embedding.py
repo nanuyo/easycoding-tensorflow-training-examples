@@ -13,10 +13,6 @@ tokenizer.fit_on_texts(input_data)
 print(tokenizer.word_index)
 keyboard.wait('Enter')
 
-print(tokenizer.word_index.keys())
-keyboard.wait('Enter')
-
-
 sequences = tokenizer.texts_to_sequences(input_data)
 print(sequences)
 keyboard.wait('Enter')
