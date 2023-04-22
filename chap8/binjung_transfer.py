@@ -2,6 +2,15 @@ import tensorflow as tf
 from bs4 import BeautifulSoup
 import string
 
+import urllib.request
+url = "https://storage.googleapis.com/learning-datasets/sarcasm.json"
+file_name = "sarcasm.json"
+urllib.request.urlretrieve(url, file_name)
+
+import json
+with open("sarcasm.json", 'r') as f:
+    datastore = json.load(f)
+
 #불용어 테이블
 stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "as", "at",
              "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "could", "did", "do",
@@ -19,16 +28,6 @@ stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "a
 
 
 table = str.maketrans('', '', string.punctuation)
-
-
-import urllib.request
-url = "https://storage.googleapis.com/learning-datasets/sarcasm.json"
-file_name = "sarcasm.json"
-urllib.request.urlretrieve(url, file_name)
-
-import json
-with open("sarcasm.json", 'r') as f:
-    datastore = json.load(f)
 
 sentences = []
 labels = []
@@ -51,7 +50,7 @@ for item in datastore:
     labels.append(item['is_sarcastic'])
     urls.append(item['article_link'])
 
-training_size = 24000
+training_size = 23000
 training_sentences = sentences[0:training_size]
 testing_sentences = sentences[training_size:]
 training_labels = labels[0:training_size]

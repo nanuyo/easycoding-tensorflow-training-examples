@@ -7,6 +7,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import numpy as np
 
+
 #빈정거림 기사 데이터 다운로드
 url = "https://storage.googleapis.com/learning-datasets/sarcasm.json"
 file_name = "sarcasm.json"
@@ -19,7 +20,7 @@ print(json.dumps(datastore[:10], indent=4))
 print(len(datastore))
 
 
-#불용어 테이블
+# #불용어 테이블
 stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "as", "at",
              "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "could", "did", "do",
              "does", "doing", "down", "during", "each", "few", "for", "from", "further", "had", "has", "have", "having",
@@ -36,7 +37,7 @@ stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "a
 
 # 구두점 테이블 만듬
 table = str.maketrans('', '', string.punctuation)
-print(table)
+
 
 
 sentences = []
@@ -68,12 +69,13 @@ for item in datastore:
         # 불용어 제거
         if word not in stopwords:
             filtered_sentence = filtered_sentence + word + " "
+
     sentences.append(filtered_sentence)    #'former versace store clerk sues secret black code minority shoppers '
     labels.append(item['is_sarcastic'])
     urls.append(item['article_link'])
 
 
-
+#전체 문장의 토큰화
 tokenizer = Tokenizer(oov_token="<OOV>")
 tokenizer.fit_on_texts(sentences)
 word_index = tokenizer.word_index
@@ -91,11 +93,6 @@ training_sentences = sentences[0:training_size]
 testing_sentences = sentences[training_size:]
 training_labels = labels[0:training_size]
 testing_labels = labels[training_size:]
-
-print(len(sentences))
-print(sentences[0])
-print(len(training_sentences))
-
 
 
 max_length = 100  #최대 문장길이를 100개 단어로
