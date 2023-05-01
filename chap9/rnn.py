@@ -73,6 +73,7 @@ tokenizer = Tokenizer(oov_token=oov_tok)
 tokenizer.fit_on_texts(training_sentences)
 word_index = tokenizer.word_index
 vocab_size = len(word_index)+1
+print(vocab_size)
 
 # 토크나이저 저장
 import pickle
@@ -95,14 +96,17 @@ testing_padded = np.array(testing_padded)
 testing_labels = np.array(testing_labels)
 model = tf.keras.Sequential([
     tf.keras.layers.Embedding(vocab_size, embedding_dim),
-    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim)),
+    # tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim, return_sequences=True)),
+    # tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim)),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim, return_sequences=True, dropout=0.2)),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim, dropout=0.2)),
     tf.keras.layers.Dense(24, activation='relu'),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
-adam = tf.keras.optimizers.Adam(learning_rate=0.00001,
-                                beta_1=0.9, beta_2=0.999, amsgrad=False)
-model.compile(loss='binary_crossentropy',
-              optimizer=adam, metrics=['accuracy'])
+#adam = tf.keras.optimizers.Adam(learning_rate=0.00001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+#과대 적합을 줄이기 위해서 손실율을 20% 낮춤
+adam = tf.keras.optimizers.Adam(learning_rate=0.000008, beta_1=0.9, beta_2=0.999, amsgrad=False)
+model.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
 model.summary()
 
 num_epochs = 30
@@ -116,13 +120,16 @@ plt.plot(history.history['val_accuracy'])
 plt.xlabel('epochs')
 plt.ylabel('accuracy')
 plt.legend(['accuracy', 'val_accuracy'])
+plt.savefig('lstm_dropout_acc.png')
 plt.show()
+
 
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.xlabel('epochs')
 plt.ylabel('loss')
 plt.legend(['loss', 'val_loss'])
+plt.savefig('lstm_dropout_loss.png')
 plt.show()
 
 # 모델 저장

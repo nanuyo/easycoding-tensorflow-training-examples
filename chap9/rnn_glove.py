@@ -115,6 +115,59 @@ padding_type='post'
 oov_tok = "<OOV>"
 training_size = 23000
 
+training_sentences = sentences[0:training_size]
+testing_sentences = sentences[training_size:]
+training_labels = labels[0:training_size]
+testing_labels = labels[training_size:]
+
+tokenizer = Tokenizer(num_words=vocab_size, oov_token=oov_tok)
+tokenizer.fit_on_texts(training_sentences)
+
+word_index = tokenizer.word_index
+print(len(word_index))
+
+# 토크나이저 저장
+import pickle
+# saving
+with open('tokenizer_glove.pickle', 'wb') as handle:
+    pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+training_sequences = tokenizer.texts_to_sequences(training_sentences)
+training_padded = pad_sequences(training_sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
+
+testing_sequences = tokenizer.texts_to_sequences(testing_sentences)
+testing_padded = pad_sequences(testing_sequences, maxlen=max_length, padding=padding_type, truncating=trunc_type)
+
+xs=[]
+ys=[]
+cumulative_x=[]
+cumulative_y=[]
+total_y=0
+for word, index in tokenizer.word_index.items():
+  xs.append(index)
+  cumulative_x.append(index)
+  if glove_embeddings.get(word) is not None:
+    total_y = total_y + 1
+    ys.append(1)
+  else:
+    ys.append(0)
+  cumulative_y.append(total_y / index)
+
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(12, 2))
+ax.spines['top'].set_visible(False)
+
+plt.margins(x=0, y=None, tight=True)
+# plt.axis([13000, 14000, 0, 1])
+plt.fill(ys)
+
+import matplotlib.pyplot as plt
+
+plt.plot(cumulative_x, cumulative_y)
+plt.axis([13000, 14000, .97, .98])
+print(cumulative_y[-1:])
+
 embedding_matrix = np.zeros((vocab_size, embedding_dim))
 for word, index in tokenizer.word_index.items():
     if index > vocab_size - 1:
@@ -123,3 +176,68 @@ for word, index in tokenizer.word_index.items():
         embedding_vector = glove_embeddings.get(word)
         if embedding_vector is not None:
             embedding_matrix[index] = embedding_vector
+
+print(embedding_matrix[2])
+print(tokenizer.word_index)
+
+import numpy as np
+
+training_padded = np.array(training_padded)
+training_labels = np.array(training_labels)
+testing_padded = np.array(testing_padded)
+testing_labels = np.array(testing_labels)
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Embedding(vocab_size, embedding_dim,
+                              weights=[embedding_matrix], trainable=False),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim,
+                                                       return_sequences=True)),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(embedding_dim)),
+    tf.keras.layers.Dense(24, activation='relu'),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
+adam = tf.keras.optimizers.Adam(learning_rate=0.00001,
+                                beta_1=0.9, beta_2=0.999, amsgrad=False)
+model.compile(loss='binary_crossentropy',optimizer=adam, metrics=['accuracy'])
+
+
+model.summary()
+
+
+num_epochs = 30
+history = model.fit(training_padded, training_labels, epochs=num_epochs, validation_data=(testing_padded, testing_labels), verbose=2)
+
+import matplotlib.pyplot as plt
+
+
+def plot_graphs(history, string):
+    plt.plot(history.history[string])
+    plt.plot(history.history['val_' + string])
+    plt.xlabel("Epochs")
+    plt.ylabel(string)
+    plt.legend([string, 'val_' + string])
+    plt.show()
+
+
+plot_graphs(history, "accuracy")
+plot_graphs(history, "loss")
+
+
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.xlabel('epochs')
+plt.ylabel('accuracy')
+plt.legend(['accuracy', 'val_accuracy'])
+plt.savefig('rnn_glove_accu.png')
+plt.show()
+
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.xlabel('epochs')
+plt.ylabel('loss')
+plt.legend(['loss', 'val_loss'])
+plt.savefig('rnn_glove_loss.png')
+plt.show()
+
+# 모델 저장
+model.save('rnn_glove_model')
